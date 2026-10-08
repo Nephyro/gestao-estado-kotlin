@@ -14,6 +14,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,26 +32,21 @@ import com.example.gestaoestado.components.CaixaDeEntrada
 import com.example.gestaoestado.components.CardResultado
 
 @Composable
-fun JurosScreen(modifier: Modifier = Modifier) {
-    var capital by remember {
-        mutableStateOf("")
-    }
+fun JurosScreen(
+    modifier: Modifier = Modifier,
+    jurosScreenViewModel: JurosScreenViewModel
+    ) {
 
-    var taxa by remember {
-        mutableStateOf("")
-    }
+    // Aqui estamos obtendo os valores dos campos do formulário a partir do ViewModel
+    val capital by jurosScreenViewModel.capital.observeAsState(initial = "")
 
-    var tempo by remember {
-        mutableStateOf("")
-    }
+    val taxa by jurosScreenViewModel.taxa.observeAsState(initial = "")
 
-    var juros by remember {
-        mutableDoubleStateOf(0.0)
-    }
+    val tempo by jurosScreenViewModel.tempo.observeAsState(initial = "")
 
-    var montante by remember {
-        mutableDoubleStateOf(0.0)
-    }
+    val juros by jurosScreenViewModel.juros.observeAsState(0.0)
+
+    val montante by jurosScreenViewModel.montante.observeAsState(0.0)
 
     Column (
         modifier = modifier.fillMaxSize(),
@@ -104,49 +100,40 @@ fun JurosScreen(modifier: Modifier = Modifier) {
                             label = "Valor investimento",
                             placeholder = "Quanto deseja investir?",
                             keyboardType = KeyboardType.Decimal,
-                            value = capital
-                        ) {
-                            // Atualiza o valor de capital
-                            capital = it
-                        }
+                            value = capital,
+                            atualizarValor = {
+                                jurosScreenViewModel.onCapitalChanged(it)
+                            }
+                        )
 
                         CaixaDeEntrada(
                             modifier = Modifier.fillMaxWidth(),
                             label = "Taxa de juros mensal",
                             placeholder = "Qual a taxa de juros mensal?",
                             keyboardType = KeyboardType.Decimal,
-                            value = taxa
-                        ) {
-                            // Atualiza o valor de taxa
-                            taxa = it
-
-                        }
+                            value = taxa,
+                            atualizarValor = {
+                                jurosScreenViewModel.onTaxaChanged(it)
+                            }
+                        )
 
                         CaixaDeEntrada(
                             modifier = Modifier.fillMaxWidth(),
                             label = "Período em meses",
                             placeholder = "Qual o tempo em meses?",
                             keyboardType = KeyboardType.Decimal,
-                            value = tempo
-                        ) {
-                            // Atualiza o valor de tempo
-                            tempo = it
-
-                        }
+                            value = tempo,
+                            atualizarValor = {
+                                jurosScreenViewModel.onTempoChanged(it)
+                            }
+                        )
 
 
                         Button(
                             onClick = {
-                                juros = calcularJuros(
-                                    capital = capital.toDouble(),
-                                    taxa = taxa.toDouble(),
-                                    tempo = tempo.toDouble()
-                                )
+                                jurosScreenViewModel.calcularJurosInvestimento()
 
-                                montante = calcularMontante(
-                                    capital = capital.toDouble(),
-                                    juros = juros
-                                )
+                                jurosScreenViewModel.calcularMontanteInvestimento()
                             },
                             modifier = Modifier.fillMaxWidth()
                                 .height(48.dp)

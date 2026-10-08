@@ -18,6 +18,7 @@ fun CaixaDeEntrada(
     // (String) -> Unit é uma função que recebe uma string e não retorna nada
     atualizarValor: (String) -> Unit    // Função de callback para atualizar o valor
     ) {
+    // Construtor do componente
     OutlinedTextField(
         modifier = modifier,
         label = {
